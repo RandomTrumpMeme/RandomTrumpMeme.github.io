@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<body>
+<script>
+// I've omitted my Imgur client ID. You'll need to create and account and register your app which will give access to the API.
+
+client_id="e8e221088292021"
+
+auth_url="https://api.imgur.com/3/gallery/r/republicanmemes"
+
+w="";
+JSON_data="";
+next="0";
+count=0;
+cwidth=0;
+cheight=0;
+
+function cancel(){
+  return false;
+}
+
+function img_loaded(){
+im=document.getElementById('test');
+msg=document.getElementById('status');
+test.style.display="";
+test.width=cwidth;
+test.height=cheight;
+msg.style.display="none";
+}
+
+function imgur_response(){
+  obj=JSON_data.data[count];
+  if (obj.is_album){
+  while (obj.is_album){
+    count++;
+    if (count >= 50){
+      count=0;
+      setTimeout("anykey()",0)
+      return true;
+    }
+    obj=JSON_data.data[count];    
+  }}else{
+    count++;
+  }
+
+  im=document.getElementById('test');
+  msg=document.getElementById('status');
+  im.style.display="none";
+  msg.style.display="";
+  imag=new Image();
+  imag.src=obj.link;
+  imag.onload=img_loaded;
+  width=obj.width;
+  height=obj.height;
+
+  if (height>window.innerHeight-20 || width > window.innerWidth-20){
+    if (width/height >= (window.innerWidth-20)/(window.innerHeight-20)){
+        coef=(window.innerWidth-20)/width;
+        width=window.innerWidth-20;
+        height=Math.floor(height*coef)
+      }else{
+        coef=(window.innerHeight-20)/height;
+        width=Math.floor(width*coef)
+        height=window.innerHeight-20;
+    }
+  }
+  filename=obj.link;
+  filter=new RegExp(/http\:\/\/i\.imgur\.com\//gi);
+  fname = filename.replace(filter,"");
+  msg.innerHTML="Loading "+fname + "...";
+
+  im.src=imag.src;
+  im.title=obj.title;
+  cwidth=width;
+  cheight=height;
+}
+
+function NoCache(){
+cur_time=new Date();
+tick=cur_time.getTime();
+ext=Math.floor(Math.random()*1000);
+return tick+""+ext;
+}
+
+
+
+// Simple AJAX to retrieve JSON object from remote server
+
+imgur_auth=function (){
+if (count == 0 || count >= 50){
+  count=0;
+xmlhttp=new XMLHttpRequest();
+
+xmlhttp.open("GET",auth_url+"?cache="+NoCache(),true);
+
+xmlhttp.setRequestHeader("Authorization","Client-ID "+client_id);
+
+xmlhttp.onreadystatechange=function()
+  {
+  if (xmlhttp.readyState==4 && xmlhttp.status==200)
+    {
+      JSON_doc=xmlhttp.responseText;
+      limit=xmlhttp.getAllResponseHeaders();
+      JSON_data=JSON.parse(JSON_doc);
+      imgur_response();
+    }
+  } 
+
+
+  xmlhttp.send();
+}else{
+  imgur_response();
+}
+}
+
+
+function anykey(){
+  var x = event.keyCode;
+  if(x==32)
+  {
+    last=new Date();
+    ts=last.getTime();
+    if (ts > next){
+      next=ts+1000;
+      imgur_auth();
+    }
+  }
+}
+
+function anykeynocheck(){
+  
+  last=new Date();
+  ts=last.getTime();
+  if (ts > next){
+    next=ts+1000;
+    imgur_auth();
+  }
+}
+
+
+document.onkeydown=anykey;
+window.onload=anykeynocheck;
+
+</script>
+<center><h6>(Any key to see another Trump meme)</h6></center>
+<center><button onclick="anykeynocheck()">(Heres a little alternative for Mobile)</button></center>
+<center><img id=test style="display:none;"><span id=status /></center>
+<b>Well, Actually this isn't all Trump memes, but There wasn't quite a subreddit to find trump memes as r/republicanmemes, so I just used that.</b><br/>
+<i>Credits to the big, big reddit which helped me a lot.</i><br/>
+<a href="https://github.com/RandomTrumpMeme/RandomTrumpMeme.github.io">Source</a>
+
+</body>
+</html>
